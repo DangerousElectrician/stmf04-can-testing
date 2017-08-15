@@ -1,6 +1,10 @@
 #MicroXplorer Configuration settings - do not modify
-CAN.CalculateTimeQuantum=333.3333333333333
-CAN.IPParameters=CalculateTimeQuantum
+CAN.BS1=CAN_BS1_7TQ
+CAN.BS2=CAN_BS2_4TQ
+CAN.CalculateTimeBit=1000
+CAN.CalculateTimeQuantum=83.33333333333333
+CAN.IPParameters=CalculateTimeQuantum,BS1,CalculateTimeBit,BS2,Prescaler
+CAN.Prescaler=4
 FREERTOS.IPParameters=Tasks01
 FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL
 File.Version=6

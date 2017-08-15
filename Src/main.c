@@ -61,6 +61,7 @@ osThreadId defaultTaskHandle;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+osThreadId canTaskHandle;
 
 /* USER CODE END PV */
 
@@ -72,6 +73,7 @@ void StartDefaultTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+void StartCanTask(void const * argument);
 
 /* USER CODE END PFP */
 
@@ -129,6 +131,8 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  osThreadDef(canTask, StartCanTask, osPriorityNormal, 0, 128);
+  canTaskHandle = osThreadCreate(osThread(canTask), NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -202,17 +206,19 @@ static void MX_CAN_Init(void)
 {
 
   hcan.Instance = CAN;
-  hcan.Init.Prescaler = 16;
+  hcan.Init.Prescaler = 4; //default: 16
   hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SJW = CAN_SJW_1TQ;
-  hcan.Init.BS1 = CAN_BS1_1TQ;
-  hcan.Init.BS2 = CAN_BS2_1TQ;
+  hcan.Init.BS1 = CAN_BS1_7TQ; //default: 1
+  hcan.Init.BS2 = CAN_BS2_4TQ; //default: 1
+  //default bit timing settings seem to be set for 1Mbit but it does not work
   hcan.Init.TTCM = DISABLE;
   hcan.Init.ABOM = DISABLE;
   hcan.Init.AWUM = DISABLE;
   hcan.Init.NART = DISABLE;
   hcan.Init.RFLM = DISABLE;
   hcan.Init.TXFP = DISABLE;
+
   if (HAL_CAN_Init(&hcan) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -249,6 +255,28 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void StartCanTask(void const * argument)
+{
+static CanTxMsgTypeDef        TxMessage;
+static CanRxMsgTypeDef        RxMessage;
+  hcan.pTxMsg = &TxMessage;
+  hcan.pRxMsg = &RxMessage;
+
+	hcan.pTxMsg->ExtId = 0x1111;
+	hcan.pTxMsg->IDE = CAN_ID_EXT;
+	hcan.pTxMsg->RTR = CAN_RTR_DATA;
+	hcan.pTxMsg->DLC = 1;
+	uint8_t count = 0;
+	while(1)
+	{
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+		hcan.pTxMsg->Data[0] = count;
+		count++;
+		HAL_CAN_Transmit(&hcan, 10);
+		osDelay(100);
+	}
+}
 
 /* USER CODE END 4 */
 
