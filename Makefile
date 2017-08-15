@@ -210,6 +210,9 @@ $(BUILD_DIR):
 clean:
 	-rm -fR .dep $(BUILD_DIR)
   
+
+upload: all
+	st-flash write build/$(TARGET).bin 0x8000000
 #######################################
 # dependencies
 #######################################
