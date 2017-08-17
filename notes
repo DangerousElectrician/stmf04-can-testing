@@ -1,0 +1,9 @@
+openocd -f /usr/share/openocd/scripts/board/st_nucleo_f0.cfg
+arm-none-eabi-gdb Unnamed_Project.elf
+target remote :3333
+info functions
+
+HAL_NVIC_EnableIRQ(CEC_CAN_IRQn);
+	seems to be required to make HAL_CAN_Receive_IT and HAL_CAN_Transmit_IT work with interrupts
+	interrupt doesn't seem to be running the IRQ though
+
