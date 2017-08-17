@@ -62,6 +62,7 @@ osThreadId defaultTaskHandle;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 osThreadId canTaskHandle;
+uint8_t count = 0;
 
 /* USER CODE END PV */
 
@@ -266,16 +267,66 @@ static CanRxMsgTypeDef        RxMessage;
 	hcan.pTxMsg->ExtId = 0x1111;
 	hcan.pTxMsg->IDE = CAN_ID_EXT;
 	hcan.pTxMsg->RTR = CAN_RTR_DATA;
-	hcan.pTxMsg->DLC = 1;
-	uint8_t count = 0;
+	hcan.pTxMsg->DLC = 8;
+
+  CAN_FilterConfTypeDef  sFilterConfig;
+  sFilterConfig.FilterNumber = 0;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdLow = 0x0000;
+  sFilterConfig.FilterMaskIdHigh = 0x0000;
+  sFilterConfig.FilterMaskIdLow = 0x0000;
+  sFilterConfig.FilterFIFOAssignment = 0;
+  sFilterConfig.FilterActivation = ENABLE;
+  sFilterConfig.BankNumber = 4;
+
+  if (HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK)
+  {
+    /* Filter configuration Error */
+    Error_Handler();
+  }
+
+	HAL_NVIC_EnableIRQ(CEC_CAN_IRQn);
+
+	uint8_t receiveStatus = 0;
+	receiveStatus = HAL_CAN_Receive_IT(&hcan, CAN_FIFO0);
+	//__HAL_CAN_ENABLE_IT(&hcan, CAN_FIFO0);
 	while(1)
 	{
-		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+		//HAL_CAN_Receive(&hcan, CAN_FIFO0, 1000);
+	//	count = hcan.pRxMsg->Data[0];
+		//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
 		hcan.pTxMsg->Data[0] = count;
+		hcan.pTxMsg->Data[1] = count;
+		hcan.pTxMsg->Data[2] = count;
+		hcan.pTxMsg->Data[3] = count;
+		hcan.pTxMsg->Data[4] = count;
+		hcan.pTxMsg->Data[5] = count;
+		hcan.pTxMsg->Data[6] = receiveStatus;
+		hcan.pTxMsg->Data[7] = 0;
 		count++;
-		HAL_CAN_Transmit(&hcan, 10);
-		osDelay(100);
+		HAL_CAN_Transmit_IT(&hcan);
+		//hcan.pTxMsg->Data[7]++;
+		//HAL_CAN_Transmit_IT(&hcan);
+		//hcan.pTxMsg->Data[7]++;
+		//HAL_CAN_Transmit_IT(&hcan);
+		//HAL_CAN_Transmit(&hcan, 10);
+		osDelay(200);
 	}
+}
+
+void CEC_CAN_IRQHandler(void)
+{
+
+	HAL_CAN_IRQHandler(&hcan);
+}
+
+void HAL_CAN_RxCpltCallback (CAN_HandleTypeDef * hcan) 
+{
+	//count = 0;
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+	HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
 }
 
 /* USER CODE END 4 */
