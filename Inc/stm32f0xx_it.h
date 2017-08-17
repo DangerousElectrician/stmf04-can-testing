@@ -49,6 +49,7 @@ void NMI_Handler(void);
 void HardFault_Handler(void);
 void SysTick_Handler(void);
 void TIM17_IRQHandler(void);
+void CEC_CAN_IRQHandler(void);
 
 #ifdef __cplusplus
 }

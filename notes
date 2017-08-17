@@ -6,4 +6,5 @@ info functions
 HAL_NVIC_EnableIRQ(CEC_CAN_IRQn);
 	seems to be required to make HAL_CAN_Receive_IT and HAL_CAN_Transmit_IT work with interrupts
 	interrupt doesn't seem to be running the IRQ though
+	fixed by enabling the CAN interrupt in stm32cube
 

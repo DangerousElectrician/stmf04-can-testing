@@ -207,19 +207,17 @@ static void MX_CAN_Init(void)
 {
 
   hcan.Instance = CAN;
-  hcan.Init.Prescaler = 4; //default: 16
+  hcan.Init.Prescaler = 4;
   hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SJW = CAN_SJW_1TQ;
-  hcan.Init.BS1 = CAN_BS1_7TQ; //default: 1
-  hcan.Init.BS2 = CAN_BS2_4TQ; //default: 1
-  //default bit timing settings seem to be set for 1Mbit but it does not work
+  hcan.Init.BS1 = CAN_BS1_7TQ;
+  hcan.Init.BS2 = CAN_BS2_4TQ;
   hcan.Init.TTCM = DISABLE;
   hcan.Init.ABOM = DISABLE;
   hcan.Init.AWUM = DISABLE;
   hcan.Init.NART = DISABLE;
   hcan.Init.RFLM = DISABLE;
   hcan.Init.TXFP = DISABLE;
-
   if (HAL_CAN_Init(&hcan) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -287,8 +285,6 @@ static CanRxMsgTypeDef        RxMessage;
     Error_Handler();
   }
 
-	HAL_NVIC_EnableIRQ(CEC_CAN_IRQn);
-
 	uint8_t receiveStatus = 0;
 	receiveStatus = HAL_CAN_Receive_IT(&hcan, CAN_FIFO0);
 	//__HAL_CAN_ENABLE_IT(&hcan, CAN_FIFO0);
@@ -316,15 +312,9 @@ static CanRxMsgTypeDef        RxMessage;
 	}
 }
 
-void CEC_CAN_IRQHandler(void)
-{
-
-	HAL_CAN_IRQHandler(&hcan);
-}
-
 void HAL_CAN_RxCpltCallback (CAN_HandleTypeDef * hcan) 
 {
-	//count = 0;
+	count = hcan->pRxMsg->Data[0];
 	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
 	HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
 }
