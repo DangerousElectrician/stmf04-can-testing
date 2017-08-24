@@ -257,27 +257,27 @@ static void MX_GPIO_Init(void)
 
 void StartCanTask(void const * argument)
 {
-static CanTxMsgTypeDef        TxMessage;
-static CanRxMsgTypeDef        RxMessage;
+  static CanTxMsgTypeDef TxMessage;
+  static CanRxMsgTypeDef RxMessage;
   hcan.pTxMsg = &TxMessage;
   hcan.pRxMsg = &RxMessage;
 
-	hcan.pTxMsg->ExtId = 0x1111;
-	hcan.pTxMsg->IDE = CAN_ID_EXT;
-	hcan.pTxMsg->RTR = CAN_RTR_DATA;
-	hcan.pTxMsg->DLC = 8;
+  hcan.pTxMsg->ExtId = 0x1111;
+  hcan.pTxMsg->IDE = CAN_ID_EXT;
+  hcan.pTxMsg->RTR = CAN_RTR_DATA;
+  hcan.pTxMsg->DLC = 8;
 
   CAN_FilterConfTypeDef  sFilterConfig;
   sFilterConfig.FilterNumber = 0;
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  sFilterConfig.FilterIdHigh = 0x0000;
+  sFilterConfig.FilterIdHigh = 0x0000; // Set the filter to let everything through
   sFilterConfig.FilterIdLow = 0x0000;
   sFilterConfig.FilterMaskIdHigh = 0x0000;
   sFilterConfig.FilterMaskIdLow = 0x0000;
   sFilterConfig.FilterFIFOAssignment = 0;
   sFilterConfig.FilterActivation = ENABLE;
-  sFilterConfig.BankNumber = 4;
+  sFilterConfig.BankNumber = 4; //Not entirely sure what this is for
 
   if (HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK)
   {
@@ -285,38 +285,38 @@ static CanRxMsgTypeDef        RxMessage;
     Error_Handler();
   }
 
-	uint8_t receiveStatus = 0;
-	receiveStatus = HAL_CAN_Receive_IT(&hcan, CAN_FIFO0);
-	//__HAL_CAN_ENABLE_IT(&hcan, CAN_FIFO0);
-	while(1)
-	{
-		//HAL_CAN_Receive(&hcan, CAN_FIFO0, 1000);
-	//	count = hcan.pRxMsg->Data[0];
-		//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
-		hcan.pTxMsg->Data[0] = count;
-		hcan.pTxMsg->Data[1] = count;
-		hcan.pTxMsg->Data[2] = count;
-		hcan.pTxMsg->Data[3] = count;
-		hcan.pTxMsg->Data[4] = count;
-		hcan.pTxMsg->Data[5] = count;
-		hcan.pTxMsg->Data[6] = receiveStatus;
-		hcan.pTxMsg->Data[7] = 0;
-		count++;
-		HAL_CAN_Transmit_IT(&hcan);
-		//hcan.pTxMsg->Data[7]++;
-		//HAL_CAN_Transmit_IT(&hcan);
-		//hcan.pTxMsg->Data[7]++;
-		//HAL_CAN_Transmit_IT(&hcan);
-		//HAL_CAN_Transmit(&hcan, 10);
-		osDelay(200);
-	}
+  uint8_t receiveStatus = 0;
+  receiveStatus = HAL_CAN_Receive_IT(&hcan, CAN_FIFO0);
+  //__HAL_CAN_ENABLE_IT(&hcan, CAN_FIFO0);
+  while(1)
+  {
+    //HAL_CAN_Receive(&hcan, CAN_FIFO0, 1000);
+  //  count = hcan.pRxMsg->Data[0];
+    //HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+    hcan.pTxMsg->Data[0] = count;
+    hcan.pTxMsg->Data[1] = count;
+    hcan.pTxMsg->Data[2] = count;
+    hcan.pTxMsg->Data[3] = count;
+    hcan.pTxMsg->Data[4] = count;
+    hcan.pTxMsg->Data[5] = count;
+    hcan.pTxMsg->Data[6] = receiveStatus;
+    hcan.pTxMsg->Data[7] = 0;
+    count++;
+    HAL_CAN_Transmit_IT(&hcan);
+    //hcan.pTxMsg->Data[7]++;
+    //HAL_CAN_Transmit_IT(&hcan);
+    //hcan.pTxMsg->Data[7]++;
+    //HAL_CAN_Transmit_IT(&hcan);
+    //HAL_CAN_Transmit(&hcan, 10);
+    osDelay(200);
+  }
 }
 
 void HAL_CAN_RxCpltCallback (CAN_HandleTypeDef * hcan) 
 {
-	count = hcan->pRxMsg->Data[0];
-	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
-	HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
+  count = hcan->pRxMsg->Data[0];
+  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+  HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
 }
 
 /* USER CODE END 4 */
